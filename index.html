@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Para o Amor ♥</title>
+
+  <!-- Google Fonts: Cormorant Garamond (títulos/mensagens) + Inter (corpo/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ============================================================
+       PALETA DE CORES
+       ============================================================ */
+    :root {
+      --bg: #FADADD;            /* fundo principal (rosa claro) */
+      --accent: #c2446a;        /* destaque / botões (vinho médio) */
+      --accent-dark: #a83a5b;   /* hover dos botões */
+      --text: #5a1a2e;          /* texto principal (vinho escuro) */
+      --text-2: #9e4a62;        /* texto secundário */
+      --surface: #ffffff;       /* superfície de cards */
+      --border: #f0b8c8;        /* borda de cards */
+      --overlay: rgba(30, 10, 18, 0.88); /* overlay do lightbox */
+    }
+
+    /* ============================================================
+       RESET / BASE
+       ============================================================ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.4;
+      overflow-x: hidden;            /* nunca rolagem horizontal */
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { max-width: 100%; }
+
+    button { font-family: inherit; }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* ============================================================
+       SEÇÃO 1 — TELA DE ENTRADA
+       ============================================================ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 14px;
+      padding: 40px 20px;
+    }
+
+    .hero__photo {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      object-fit: cover;             /* sem distorção */
+      box-shadow: 0 8px 28px rgba(194, 68, 106, 0.18);
+    }
+
+    .hero__title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .hero__date {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-2);
+      margin-top: -4px;
+    }
+
+    /* ---------- Player de áudio (layout "now playing", estilo Spotify/Apple Music) ---------- */
+    .player {
+      width: 100%;
+      max-width: 280px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin: 8px 0;
+      box-shadow: 0 8px 26px rgba(194, 68, 106, 0.12);
+      text-align: center;
+    }
+
+    .player__cover {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;           /* quadro quadrado da capa */
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #FADADD, #f0b8c8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .player__cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .player__note { width: 54px; height: 54px; opacity: 0.9; }
+
+    .player__track {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player__artist {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* área de toque maior em volta da barra fina (bom para mobile) */
+    .player__seek {
+      padding: 9px 0;
+      margin-top: 12px;
+      cursor: pointer;
+      touch-action: none;            /* permite arrastar sem rolar a página */
+    }
+    .player__bar {
+      position: relative;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+    }
+    .player__fill {
+      position: relative;
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+    .player__knob {
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .player__seek:hover .player__knob,
+    .player__seek.dragging .player__knob { opacity: 1; }
+
+    .player__times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-2);
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+
+    .player__controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 26px;
+      margin-top: 14px;
+    }
+    .player__btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 50%;
+      transition: color 0.2s ease, transform 0.1s ease;
+    }
+    .player__btn:hover { color: var(--accent); }
+    .player__btn:active { transform: scale(0.92); }
+    .player__btn--play {
+      background: var(--accent);
+      color: #fff;
+      width: 48px;
+      height: 48px;
+    }
+    .player__btn--play:hover { background: var(--accent-dark); color: #fff; }
+
+    /* ---------- Botão "Ver nossa história" ---------- */
+    .hero__cta {
+      margin-top: 6px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 26px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+    .hero__cta:hover { background: var(--accent-dark); }
+    .hero__cta:active { transform: scale(0.97); }
+
+    /* ============================================================
+       SEÇÃO 2 — LINHA DO TEMPO
+       ============================================================ */
+    .timeline {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 70px 20px 80px;
+    }
+
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 27px;
+      font-weight: 600;
+      text-align: center;
+      color: var(--text);
+      margin-bottom: 44px;
+      letter-spacing: 0.5px;
+    }
+
+    .timeline__list {
+      position: relative;
+      padding-left: 36px;          /* abre espaço para a linha + nós */
+    }
+
+    /* linha vertical que conecta os cards */
+    .timeline__list::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .card {
+      position: relative;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 18px rgba(194, 68, 106, 0.06);
+      /* estado inicial da animação (fade-in + slide-up) */
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .card:last-child { margin-bottom: 0; }
+    .card.visible { opacity: 1; transform: translateY(0); }
+
+    /* nó (ponto) sobre a linha, alinhado a cada card */
+    .card::before {
+      content: '';
+      position: absolute;
+      left: -35px;
+      top: 24px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+    }
+
+    .card__thumb-wrap {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .card__thumb {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: block;
+      transition: filter 0.2s ease;
+    }
+    .card__thumb-wrap:hover .card__thumb { filter: brightness(0.94); }
+
+    /* ícone de maximizar no canto inferior direito do thumbnail */
+    .card__icon {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      width: 18px;
+      height: 18px;
+      background: rgba(194, 68, 106, 0.92);
+      color: #fff;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .card__body { min-width: 0; }
+
+    .card__date {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .card__title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+      margin: 3px 0 5px;
+    }
+
+    .card__text {
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.55;
+    }
+
+    /* seção do álbum (vem logo depois da linha do tempo, em sequência) */
+    .album-section {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 10px 20px 80px;
+    }
+
+    /* ---------- Álbum "Mais fotos com o Mor" (estilo livro aberto / scrapbook) ---------- */
+    .album__book {
+      position: relative;
+      background: #fffdfd;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 12px 34px rgba(194, 68, 106, 0.14);
+      padding: 22px;
+    }
+    .album__spread {
+      position: relative;
+      display: flex;
+      gap: 30px;
+    }
+    .album__spread[hidden] { display: none; }
+    .album__spread.fade { animation: albumFade 0.35s ease; }
+    @keyframes albumFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: none; }
+    }
+    /* lombada central do livro */
+    .album__spread::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 50%;
+      width: 26px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, rgba(194,68,106,0) 0%, rgba(194,68,106,0.10) 50%, rgba(194,68,106,0) 100%);
+      pointer-events: none;
+    }
+    .album__page {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      justify-content: center;
+      gap: 16px;
+      padding: 6px 0;
+    }
+
+    .photo-frame {
+      position: relative;
+      border: 0;
+      background: #fff;
+      padding: 7px 7px 9px;
+      border-radius: 4px;
+      box-shadow: 0 5px 14px rgba(90, 26, 46, 0.16);
+      cursor: pointer;
+      transform: rotate(var(--rot, 0deg));
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .photo-frame.large { width: 58%; }
+    .photo-frame.small { width: 36%; }
+    .photo-frame img {
+      width: 100%;
+      height: auto;       /* mantém a proporção da foto (sem cortar) */
+      display: block;
+      border-radius: 2px;
+    }
+    .photo-frame:hover {
+      transform: rotate(0deg) translateY(-5px) scale(1.03);
+      box-shadow: 0 12px 26px rgba(90, 26, 46, 0.26);
+      z-index: 3;
+    }
+    /* fitinha no topo da foto */
+    .photo-frame::before {
+      content: '';
+      position: absolute;
+      top: -7px; left: 50%;
+      width: 48px; height: 16px;
+      transform: translateX(-50%) rotate(-5deg);
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    /* coraçãozinho no canto */
+    .photo-frame::after {
+      content: '♥';
+      position: absolute;
+      bottom: 3px; right: 7px;
+      font-size: 11px;
+      line-height: 1;
+      color: var(--accent);
+      opacity: 0.75;
+    }
+
+    .album__nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .album__arrow {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--accent);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+    }
+    .album__arrow:hover:not(:disabled) {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .album__arrow:disabled { opacity: 0.35; cursor: default; }
+    .album__dots { display: flex; gap: 7px; }
+    .album__dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .album__dot.active { background: var(--accent); transform: scale(1.25); }
+
+    @media (max-width: 640px) {
+      .album__spread { flex-direction: column; gap: 26px; }
+      .album__spread::before { display: none; }
+    }
+
+    /* ============================================================
+       LIGHTBOX
+       ============================================================ */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--overlay);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .lightbox.open { opacity: 1; visibility: visible; }
+
+    .lightbox__img {
+      max-width: 90vw;
+      max-height: 80vh;
+      border-radius: 8px;
+      object-fit: contain;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .lightbox__caption {
+      font-size: 12px;
+      color: var(--border);
+      text-align: center;
+      max-width: 90vw;
+    }
+
+    .lightbox__close {
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      width: 38px;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.12);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .lightbox__close:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* ============================================================
+       SEÇÃO 3 — ENCERRAMENTO
+       ============================================================ */
+    .closing {
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 90px 20px 110px;
+    }
+
+    .closing__content {
+      position: relative;
+      z-index: 2;          /* sempre acima dos corações */
+      text-align: center;
+    }
+
+    .closing__message {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.8;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .closing__heart {
+      display: inline-block;       /* envolve só o glifo (a batida não estica um bloco inteiro) */
+      color: var(--accent);
+      font-size: 24px;
+      margin-top: 24px;
+      line-height: 1;
+      animation: heartbeat 1.8s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      14% { transform: scale(1.18); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.12); }
+      70% { transform: scale(1); }
+    }
+
+    /* corações subindo (gerados via JS) */
+    .float-heart {
+      position: absolute;
+      bottom: 16px;
+      z-index: 1;
+      color: var(--accent);
+      opacity: 0;
+      pointer-events: none;
+      user-select: none;
+      animation-name: floatUp;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes floatUp {
+      0%   { opacity: 0;    transform: translateY(0) scale(0.7); }
+      20%  { opacity: 0.6;  }
+      80%  { opacity: 0.35; }
+      100% { opacity: 0;    transform: translateY(-280px) scale(1.1); }
+    }
+
+    /* ---------- Carta em envelope animado (antes da mensagem final) ---------- */
+    .letter-stage {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto 40px;
+      min-height: 240px;            /* fechado: ~tamanho do envelope; cresce ao abrir (via JS) */
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      transition: min-height 0.6s ease;
+    }
+
+    .envelope {
+      position: relative;
+      width: min(320px, 84vw);
+      aspect-ratio: 3 / 2;
+      perspective: 1100px;
+    }
+
+    /* traseira do envelope (camada mais baixa) */
+    .envelope__back {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 16px 40px rgba(90, 26, 46, 0.20);
+      z-index: 1;
+    }
+
+    /* a carta — entre a traseira e a frente, "sai de dentro" */
+    .envelope__letter {
+      position: absolute;
+      left: 50%;
+      bottom: 52%;
+      width: 86%;
+      transform: translateX(-50%) translateY(28px);
+      opacity: 0;
+      z-index: 2;
+      transition: transform 1s ease-out 0.5s, opacity 0.9s ease-out 0.5s;
+    }
+    .envelope[data-state="opening"] .envelope__letter,
+    .envelope[data-state="open"] .envelope__letter {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .letter {
+      background: #fdfaf6;
+      border: 1px solid #efe4d6;
+      border-radius: 6px;
+      box-shadow: 0 10px 24px rgba(90, 26, 46, 0.18);
+      padding: 22px 22px 32px;
+      text-align: center;
+      color: var(--text);
+    }
+    .letter__greeting {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .letter__body {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-2);
+    }
+    .letter__body p { margin: 0 0 10px; }
+    .letter__body p:last-child { margin-bottom: 0; }
+    .letter__sign {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      color: var(--text);
+      margin-top: 14px;
+    }
+
+    /* frente do envelope (pocket) — acima da carta */
+    .envelope__front {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 60%;
+      background: linear-gradient(180deg, #fff5f5, #ffffff);
+      border-radius: 0 0 10px 10px;
+      box-shadow: inset 0 3px 8px rgba(90, 26, 46, 0.06);
+      z-index: 3;
+    }
+    .envelope__front::before {   /* vinco em V das abas (decorativo) */
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(45deg, transparent calc(50% - 0.6px), rgba(90,26,46,0.07) 50%, transparent calc(50% + 0.6px)),
+        linear-gradient(-45deg, transparent calc(50% - 0.6px), rgba(90,26,46,0.07) 50%, transparent calc(50% + 0.6px));
+      background-size: 50% 100%;
+      background-position: left top, right top;
+      background-repeat: no-repeat;
+    }
+
+    /* tampa superior (abre em 3D) — acima da carta */
+    .envelope__lid {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 52%;
+      background: #ffffff;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top center;
+      transform-style: preserve-3d;
+      transform: rotateX(0deg);
+      transition: transform 0.6s ease-out;
+      z-index: 5;
+      border-radius: 10px 10px 0 0;
+    }
+    .envelope__lid::after {     /* leve sombra/relevo na tampa */
+      content: '';
+      position: absolute; inset: 0;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0));
+    }
+    .envelope[data-state="opening"] .envelope__lid,
+    .envelope[data-state="open"] .envelope__lid {
+      transform: rotateX(180deg);
+      z-index: 1;             /* depois de abrir vai para trás da carta */
+    }
+
+    /* selo de coração com "Abra" */
+    .envelope__seal {
+      position: absolute;
+      left: 50%; top: 30%;
+      transform: translate(-50%, -50%);
+      width: 64px; height: 60px;
+      padding: 0; border: 0; background: transparent;
+      cursor: pointer;
+      z-index: 6;
+      filter: drop-shadow(0 4px 9px rgba(194, 68, 106, 0.45));
+      transition: opacity 0.3s ease, transform 0.25s ease;
+    }
+    .envelope__seal:hover { transform: translate(-50%, -50%) scale(1.08); }
+    .envelope__seal .seal__svg { width: 100%; height: 100%; display: block; }
+    .seal__heart { fill: var(--accent); }
+    .seal__label { fill: #fff; font-family: 'Inter', sans-serif; font-size: 21px; font-weight: 600; }
+    .envelope[data-state="opening"] .envelope__seal,
+    .envelope[data-state="open"] .envelope__seal {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0.5);
+    }
+
+    /* ============================================================
+       RESPONSIVO
+       ============================================================ */
+    @media (max-width: 400px) {
+      .hero__title { font-size: 29px; }
+      .section-heading { font-size: 24px; }
+      .card__title { font-size: 18px; }
+    }
+
+    /* acessibilidade: respeita quem prefere menos movimento */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .card { opacity: 1; transform: none; transition: none; }
+      .closing__heart { animation: none; }
+      .float-heart { display: none; }
+      .envelope__lid, .envelope__letter, .envelope__seal { transition: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ============================================================
+       SEÇÃO 1 — TELA DE ENTRADA
+       ============================================================ -->
+  <section class="hero">
+    <img class="hero__photo" src="assets/img/capa.jpg" alt="Foto do casal" />
+
+    <!-- Título e data (textos fixos do presente) -->
+    <h1 class="hero__title">Para meu Amor</h1>
+    <p class="hero__date">Nosso dia</p>
+
+    <!-- Player de áudio customizado (layout "now playing") -->
+    <div class="player" role="group" aria-label="Player de música">
+      <div class="player__cover" id="playerCover">
+        <!-- placeholder visual até definir uma capa (variável PLAYER_COVER no script) -->
+        <svg class="player__note" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 18V6l10-2v12" />
+          <circle cx="6.5" cy="18" r="2.5" />
+          <circle cx="16" cy="16" r="2.5" />
+        </svg>
+      </div>
+
+      <div class="player__track" id="trackName">—</div>
+      <div class="player__artist" id="trackArtist">—</div>
+
+      <div class="player__seek" id="seekArea">
+        <div class="player__bar" id="progressBar">
+          <div class="player__fill" id="progressFill"><span class="player__knob"></span></div>
+        </div>
+      </div>
+
+      <div class="player__times">
+        <span id="curTime">0:00</span>
+        <span id="remTime">0:00</span>
+      </div>
+
+      <div class="player__controls">
+        <button class="player__btn" id="prevBtn" aria-label="Faixa anterior">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+            <path d="M6 6h2v12H6z" />
+            <path d="M20 6v12l-9-6z" />
+          </svg>
+        </button>
+        <button class="player__btn player__btn--play" id="playBtn" aria-label="Tocar"></button>
+        <button class="player__btn" id="nextBtn" aria-label="Próxima faixa">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+            <path d="M16 6h2v12h-2z" />
+            <path d="M4 6v12l9-6z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <button class="hero__cta" id="scrollBtn">Ver nossa história</button>
+  </section>
+
+  <!-- ============================================================
+       SEÇÃO 2 — LINHA DO TEMPO
+       ============================================================ -->
+  <!-- Seção 2a: Nossa história (linha do tempo) -->
+  <section class="timeline" id="timeline">
+    <h2 class="section-heading">Nossa história</h2>
+    <div class="timeline__list" id="timelineList">
+      <!-- os cards são gerados via JS a partir do array MOMENTS -->
+    </div>
+  </section>
+
+  <!-- Seção 2b: Mais fotos com o Mor (álbum), logo após a linha do tempo -->
+  <section class="album-section" id="album">
+    <h2 class="section-heading">Mais fotos com o Mor</h2>
+    <div class="album">
+      <div class="album__book" id="albumBook">
+        <!-- os spreads (páginas) são gerados via JS a partir do array ALBUM -->
+      </div>
+      <div class="album__nav">
+        <button class="album__arrow" id="albumPrev" type="button" aria-label="Página anterior">‹</button>
+        <div class="album__dots" id="albumDots" aria-hidden="true"></div>
+        <button class="album__arrow" id="albumNext" type="button" aria-label="Próxima página">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SEÇÃO 3 — ENCERRAMENTO
+       ============================================================ -->
+  <section class="closing">
+    <div class="closing__content">
+      <!-- ENVELOPE COM A CARTA — clique no selo de coração "Abra" -->
+      <div class="letter-stage">
+        <div class="envelope" id="envelope" data-state="closed">
+          <!-- a carta (sai de dentro do envelope) -->
+          <div class="envelope__letter" id="envelopeLetter">
+            <div class="letter">
+              <p class="letter__greeting">Meu amor,</p>
+              <div class="letter__body" id="letterText">
+                <p>Hoje é um dia muito especial: estamos comemorando nove meses juntos e nosso primeiro Dia dos Namorados. Espero que seja o primeiro de muitos, porque, mesmo depois de casados, você será minha eterna namorada e minha melhor companhia.</p>
+                <p>Quero estar ao seu lado sempre. A vida com você é mais leve e mais feliz, e cada momento é único. Seu jeito carinhoso e alegre ao mesmo tempo transforma qualquer situação comum em algo especial.</p>
+                <p>Por isso eu te peço: nunca mude quem você é. Todo dia eu me apaixono cada vez mais por você ser você.</p>
+              </div>
+              <p class="letter__sign">Com todo o meu amor, te amo.</p>
+            </div>
+          </div>
+
+          <div class="envelope__back"></div>
+          <div class="envelope__front"></div>
+
+          <div class="envelope__lid" id="envelopeLid"></div>
+
+          <button class="envelope__seal" id="envelopeSeal" type="button" aria-label="Abrir a carta">
+            <svg class="seal__svg" viewBox="0 0 100 92" aria-hidden="true">
+              <path class="seal__heart" d="M50 89 C 18 66, 3 45, 3 26.5 C 3 12, 15 3, 27 3 C 38 3, 47 10, 50 19 C 53 10, 62 3, 73 3 C 85 3, 97 12, 97 26.5 C 97 45, 82 66, 50 89 Z" />
+              <text class="seal__label" x="50" y="40" text-anchor="middle" dominant-baseline="middle">Abra</text>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- MENSAGEM FINAL — edite o texto entre aspas abaixo -->
+      <p class="closing__message">12 de junho • Feliz Dia dos Namorados</p>
+      <div class="closing__heart" aria-hidden="true">♥</div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LIGHTBOX (compartilhado)
+       ============================================================ -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox__close" id="lightboxClose" aria-label="Fechar">✕</button>
+    <img class="lightbox__img" id="lightboxImg" src="" alt="" />
+    <p class="lightbox__caption" id="lightboxCaption"></p>
+  </div>
+
+  <script>
+    'use strict';
+
+    /* ============================================================
+       DADOS EDITÁVEIS
+       ============================================================ */
+
+    // Playlist na ordem de reprodução. Cada faixa tem sua própria capa (foto).
+    var TRACKS = [
+      { src: 'assets/audio/musica1.mp3', name: 'No Céu Dos Braços Teus', artist: 'Di Paulo & Paulino',                        cover: 'assets/img/Foto 1.jpg' },
+      { src: 'assets/audio/musica4.mp3', name: 'Sonho de Amor',          artist: 'Zezé Di Camargo & Luciano',                 cover: 'assets/img/Foto 13.jpg' },
+      { src: 'assets/audio/musica3.mp3', name: 'Every Breath You Take',  artist: 'The Police',                                cover: 'assets/img/Foto 4.jpg' },
+      { src: 'assets/audio/musica2.mp3', name: 'Young and Beautiful',    artist: 'Lana Del Rey',                              cover: 'assets/img/Foto 5.jpg' },
+      { src: 'assets/audio/musica5.mp3', name: 'Tem Que Ser Você',       artist: 'Ícaro e Gilmar, Panda, Humberto & Ronaldo', cover: 'assets/img/Foto 3.jpg' }
+    ];
+
+    // Momentos da linha do tempo (na ordem das fotos da página).
+    var MOMENTS = [
+      { photo: 'Foto 2.jpg',  data: '9 de agosto de 2025',     titulo: 'Nossa primeira foto juntos',     texto: 'A primeira de muitas que ainda iriam por vir.' },
+      { photo: 'Foto 12.jpg', data: '6 de setembro de 2025',   titulo: 'Praticamente namorando',         texto: 'Aqui já estávamos namorando, só estava esperando o momento certo para fazer o pedido.' },
+      { photo: 'Foto 10.jpg', data: '12 de setembro de 2025',  titulo: 'O momento certo',                texto: 'Tinha que ser esse dia, a data perfeita. Nos conhecemos no dia 12 e começamos a namorar dia 12.' },
+      { photo: 'Foto 8.jpg',  data: '7 de novembro de 2025',   titulo: 'Primeiro jantar feito por nós',  texto: 'Nosso primeiro jantar romântico feito inteiramente por nós dois "juntos", eu só cortei o bacon e mexi os ovos do molho.' },
+      { photo: 'Foto 6.jpg',  data: '29 de novembro de 2025',  titulo: 'O dia que você tava mais linda', texto: 'Seu primeiro aniversário que comemoramos juntos e o dia que você estava maravilhosamente linda.' },
+      { photo: 'Foto 9.jpg',  data: '21 de dezembro de 2025',  titulo: 'O sorriso mais lindo',           texto: 'Sou completamente apaixonado pelo seu sorriso, meu amor.' },
+      { photo: 'Foto 15.jpg', data: '8 de janeiro de 2026',    titulo: 'Nossa primeira viagem juntos',   texto: 'A primeira viagem que fizemos juntos foi muito especial.' },
+      { photo: 'Foto 11.jpg', data: '14 de janeiro de 2026',   titulo: 'Segunda parte da viagem',        texto: 'Essa viagem foi inesquecível, primeiro a praia e depois os dias em São Paulo.' },
+      { photo: 'Foto 16.jpg', data: '14 de fevereiro de 2026', titulo: 'A melhor viagem',                texto: 'Com certeza essa vai ser uma das viagens mais marcantes da nossa vida, todos os momentos foram muito especiais.' },
+      { photo: 'Foto 14.jpg', data: '1 de maio de 2026',       titulo: 'Meu aniversário',                texto: 'Estava muito feliz de comemorar meu primeiro aniversário ao lado de quem eu mais amo.' }
+    ];
+
+    // Fotos do álbum "Mais fotos com o Mor" (sem descrição). A ordem não importa.
+    var ALBUM = [
+      'Foto 7.jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.58 (1).jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.58 (2).jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.58 (3).jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.58.jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.59 (1).jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.59 (2).jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.59 (3).jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.59 (4).jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.59 (5).jpg',
+      'WhatsApp Image 2026-06-11 at 23.34.59.jpg',
+      'WhatsApp Image 2026-06-11 at 23.35.00 (1).jpg',
+      'WhatsApp Image 2026-06-11 at 23.35.00 (2).jpg',
+      'WhatsApp Image 2026-06-11 at 23.35.00 (3).jpg',
+      'WhatsApp Image 2026-06-11 at 23.35.00 (4).jpg',
+      'WhatsApp Image 2026-06-11 at 23.35.00.jpg'
+    ];
+
+    // Caminho seguro p/ imagens (nomes com espaços/parênteses são codificados).
+    function imgUrl(name) { return 'assets/img/' + encodeURIComponent(name); }
+
+    /* ============================================================
+       PLAYER DE ÁUDIO
+       ============================================================ */
+    function initAudioPlayer() {
+      var audio = new Audio();
+      audio.preload = 'metadata';
+
+      var current = 0;
+      var isPlaying = false;
+      var dragging = false;
+
+      var cover       = document.getElementById('playerCover');
+      var trackName   = document.getElementById('trackName');
+      var trackArtist = document.getElementById('trackArtist');
+      var playBtn     = document.getElementById('playBtn');
+      var prevBtn     = document.getElementById('prevBtn');
+      var nextBtn     = document.getElementById('nextBtn');
+      var seekArea    = document.getElementById('seekArea');
+      var bar         = document.getElementById('progressBar');
+      var fill        = document.getElementById('progressFill');
+      var curTime     = document.getElementById('curTime');
+      var remTime     = document.getElementById('remTime');
+
+      var PLAY_ICON =
+        '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">' +
+        '<path d="M8 5v14l11-7z" /></svg>';
+      var PAUSE_ICON =
+        '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">' +
+        '<path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>';
+
+      function formatTime(seconds) {
+        if (!isFinite(seconds) || seconds < 0) return '0:00';
+        var m = Math.floor(seconds / 60);
+        var s = Math.floor(seconds % 60);
+        return m + ':' + (s < 10 ? '0' + s : s);
+      }
+
+      var NOTE_SVG =
+        '<svg class="player__note" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M9 18V6l10-2v12" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="16" cy="16" r="2.5" /></svg>';
+
+      // Cada faixa pode ter sua própria capa (foto). Sem capa = ícone de nota.
+      function applyCover(src) {
+        if (src) {
+          cover.innerHTML = '';
+          var img = document.createElement('img');
+          img.src = src;
+          img.alt = 'Capa: ' + TRACKS[current].name;
+          cover.appendChild(img);
+        } else {
+          cover.innerHTML = NOTE_SVG;
+        }
+      }
+
+      function updatePlayIcon() {
+        playBtn.innerHTML = isPlaying ? PAUSE_ICON : PLAY_ICON;
+        playBtn.setAttribute('aria-label', isPlaying ? 'Pausar' : 'Tocar');
+      }
+
+      function loadTrack(index) {
+        current = index;
+        audio.src = TRACKS[index].src;
+        audio.load();
+        trackName.textContent = TRACKS[index].name;
+        trackArtist.textContent = TRACKS[index].artist;
+        trackArtist.title = TRACKS[index].artist;   // tooltip p/ nomes longos
+        applyCover(TRACKS[index].cover);
+        fill.style.width = '0%';
+        curTime.textContent = '0:00';
+        remTime.textContent = '0:00';
+      }
+
+      function startPlayback() {
+        var promise = audio.play();
+        isPlaying = true;
+        updatePlayIcon();
+        // Se o arquivo faltar ou o navegador bloquear, falha em silêncio.
+        if (promise && typeof promise.catch === 'function') {
+          promise.catch(function () {
+            isPlaying = false;
+            updatePlayIcon();
+          });
+        }
+      }
+
+      function pausePlayback() {
+        audio.pause();
+        isPlaying = false;
+        updatePlayIcon();
+      }
+
+      function togglePlayback() {
+        if (isPlaying) pausePlayback();
+        else startPlayback();
+      }
+
+      function nextTrack() {
+        if (current < TRACKS.length - 1) {
+          var wasPlaying = isPlaying;
+          loadTrack(current + 1);
+          if (wasPlaying) startPlayback();
+        }
+      }
+
+      function prevTrack() {
+        // Volta ao início da faixa se já passou de 3s ou se é a primeira.
+        if (audio.currentTime > 3 || current === 0) {
+          audio.currentTime = 0;
+        } else {
+          var wasPlaying = isPlaying;
+          loadTrack(current - 1);
+          if (wasPlaying) startPlayback();
+        }
+      }
+
+      function onTrackEnded() {
+        // Avança sozinho; a última faixa NÃO volta para a primeira.
+        if (current < TRACKS.length - 1) {
+          loadTrack(current + 1);
+          startPlayback();
+        } else {
+          isPlaying = false;
+          updatePlayIcon();
+        }
+      }
+
+      function onLoadedMetadata() {
+        remTime.textContent = '-' + formatTime(audio.duration);
+      }
+
+      function onTimeUpdate() {
+        if (dragging) return;   // durante o arraste, o preview comanda a barra
+        if (audio.duration && isFinite(audio.duration)) {
+          fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+          remTime.textContent = '-' + formatTime(audio.duration - audio.currentTime);
+        }
+        curTime.textContent = formatTime(audio.currentTime);
+      }
+
+      /* ----- Seek: clique e arraste (mouse + toque, via Pointer Events) ----- */
+      function fractionFromEvent(event) {
+        var rect = bar.getBoundingClientRect();
+        var f = (event.clientX - rect.left) / rect.width;
+        return Math.max(0, Math.min(1, f));
+      }
+
+      function previewSeek(f) {
+        fill.style.width = (f * 100) + '%';
+        if (audio.duration && isFinite(audio.duration)) {
+          curTime.textContent = formatTime(f * audio.duration);
+          remTime.textContent = '-' + formatTime(audio.duration - f * audio.duration);
+        }
+      }
+
+      function onPointerDown(event) {
+        dragging = true;
+        seekArea.classList.add('dragging');
+        if (seekArea.setPointerCapture) {
+          try { seekArea.setPointerCapture(event.pointerId); } catch (e) {}
+        }
+        previewSeek(fractionFromEvent(event));
+      }
+
+      function onPointerMove(event) {
+        if (dragging) previewSeek(fractionFromEvent(event));
+      }
+
+      function onPointerUp(event) {
+        if (!dragging) return;
+        dragging = false;
+        seekArea.classList.remove('dragging');
+        var f = fractionFromEvent(event);
+        if (audio.duration && isFinite(audio.duration)) {
+          audio.currentTime = f * audio.duration;
+        }
+      }
+
+      playBtn.addEventListener('click', togglePlayback);
+      nextBtn.addEventListener('click', nextTrack);
+      prevBtn.addEventListener('click', prevTrack);
+      seekArea.addEventListener('pointerdown', onPointerDown);
+      seekArea.addEventListener('pointermove', onPointerMove);
+      seekArea.addEventListener('pointerup', onPointerUp);
+      seekArea.addEventListener('pointercancel', function () {
+        dragging = false;
+        seekArea.classList.remove('dragging');
+      });
+
+      audio.addEventListener('timeupdate', onTimeUpdate);
+      audio.addEventListener('loadedmetadata', onLoadedMetadata);
+      audio.addEventListener('ended', onTrackEnded);
+
+      loadTrack(0);
+      updatePlayIcon();
+    }
+
+    /* ============================================================
+       BOTÃO "VER NOSSA HISTÓRIA" — scroll suave
+       ============================================================ */
+    function initScrollButton() {
+      var btn = document.getElementById('scrollBtn');
+      var target = document.getElementById('timeline');
+      btn.addEventListener('click', function () {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    /* ============================================================
+       LINHA DO TEMPO — render dos cards + abertura do lightbox
+       ============================================================ */
+    function renderTimeline(onThumbClick) {
+      var list = document.getElementById('timelineList');
+
+      MOMENTS.forEach(function (moment) {
+        var card = document.createElement('article');
+        card.className = 'card';
+
+        var thumbWrap = document.createElement('div');
+        thumbWrap.className = 'card__thumb-wrap';
+        thumbWrap.setAttribute('role', 'button');
+        thumbWrap.setAttribute('tabindex', '0');
+        thumbWrap.setAttribute('aria-label', 'Ampliar foto: ' + moment.titulo);
+
+        var img = document.createElement('img');
+        img.className = 'card__thumb';
+        img.src = imgUrl(moment.photo);
+        img.alt = moment.titulo;
+        img.loading = 'lazy';
+
+        var icon = document.createElement('span');
+        icon.className = 'card__icon';
+        icon.innerHTML =
+          '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" ' +
+          'stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M15 3h6v6M21 3l-8 8M9 21H3v-6M3 21l8-8" /></svg>';
+
+        thumbWrap.appendChild(img);
+        thumbWrap.appendChild(icon);
+
+        var body = document.createElement('div');
+        body.className = 'card__body';
+
+        var date = document.createElement('span');
+        date.className = 'card__date';
+        date.textContent = moment.data;
+
+        var title = document.createElement('h3');
+        title.className = 'card__title';
+        title.textContent = moment.titulo;
+
+        var text = document.createElement('p');
+        text.className = 'card__text';
+        text.textContent = moment.texto;
+
+        body.appendChild(date);
+        body.appendChild(title);
+        body.appendChild(text);
+
+        card.appendChild(thumbWrap);
+        card.appendChild(body);
+        list.appendChild(card);
+
+        function openThis() {
+          onThumbClick(imgUrl(moment.photo), moment.titulo, moment.data + ' · ' + moment.titulo);
+        }
+        thumbWrap.addEventListener('click', openThis);
+        thumbWrap.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openThis();
+          }
+        });
+      });
+    }
+
+    /* ============================================================
+       REVELAÇÃO DOS CARDS (fade-in + slide-up) via IntersectionObserver
+       ============================================================ */
+    function initTimelineReveal() {
+      var cards = document.querySelectorAll('.card');
+
+      if (!('IntersectionObserver' in window)) {
+        cards.forEach(function (card) { card.classList.add('visible'); });
+        return;
+      }
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      cards.forEach(function (card) { observer.observe(card); });
+    }
+
+    /* ============================================================
+       LIGHTBOX — abre/fecha (overlay, botão ✕ e tecla Escape)
+       ============================================================ */
+    function createLightbox() {
+      var lightbox = document.getElementById('lightbox');
+      var img = document.getElementById('lightboxImg');
+      var caption = document.getElementById('lightboxCaption');
+      var closeBtn = document.getElementById('lightboxClose');
+
+      function open(src, alt, captionText) {
+        img.src = src;
+        img.alt = alt || '';
+        if (captionText) {
+          caption.textContent = captionText;
+          caption.style.display = '';
+        } else {
+          caption.textContent = '';
+          caption.style.display = 'none';
+        }
+        lightbox.classList.add('open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function close() {
+        lightbox.classList.remove('open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      closeBtn.addEventListener('click', close);
+
+      // fecha ao clicar fora da foto (no próprio overlay)
+      lightbox.addEventListener('click', function (event) {
+        if (event.target === lightbox) close();
+      });
+
+      // fecha com Escape
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && lightbox.classList.contains('open')) close();
+      });
+
+      return { open: open };
+    }
+
+    /* ============================================================
+       CORAÇÕES SUBINDO (seção de encerramento)
+       ============================================================ */
+    function initFloatingHearts() {
+      var section = document.querySelector('.closing');
+      if (!section) return;
+
+      // respeita quem prefere menos movimento
+      if (window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+      }
+
+      var timer = null;
+
+      function spawnHeart() {
+        var heart = document.createElement('span');
+        heart.className = 'float-heart';
+        heart.textContent = '♥';
+        heart.style.left = (Math.random() * 88 + 6) + '%';
+        heart.style.fontSize = (Math.random() * 12 + 10) + 'px';
+        heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+        section.appendChild(heart);
+        heart.addEventListener('animationend', function () {
+          heart.remove();
+        });
+      }
+
+      function start() { if (!timer) timer = window.setInterval(spawnHeart, 850); }
+      function stop() { if (timer) { window.clearInterval(timer); timer = null; } }
+
+      // só anima quando a seção está visível (economiza recursos)
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) start();
+            else stop();
+          });
+        }, { threshold: 0.1 });
+        observer.observe(section);
+      } else {
+        start();
+      }
+    }
+
+    /* ============================================================
+       ÁLBUM "Mais fotos com o Mor" — grade de fotos + lightbox
+       ============================================================ */
+    function renderAlbum(openLightbox) {
+      var book = document.getElementById('albumBook');
+      var dotsWrap = document.getElementById('albumDots');
+      var prevBtn = document.getElementById('albumPrev');
+      var nextBtn = document.getElementById('albumNext');
+
+      var PER_PAGE = 2;            // 2 fotos por página -> páginas mais curtas
+      var PAGES_PER_SPREAD = 2;    // páginas por spread (livro aberto)
+      var patterns = [
+        ['large', 'small'],
+        ['small', 'large']
+      ];
+      var rotations = ['-2.5deg', '1.8deg', '-2deg', '2.4deg', '-1.6deg', '2deg'];
+
+      function makeFrame(name, sizeClass, rot) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'photo-frame ' + sizeClass;
+        btn.style.setProperty('--rot', rot);
+        btn.setAttribute('aria-label', 'Ampliar foto');
+
+        var img = document.createElement('img');
+        img.src = imgUrl(name);
+        img.alt = 'Mais uma foto nossa';
+        btn.appendChild(img);
+
+        btn.addEventListener('click', function () {
+          openLightbox(imgUrl(name), 'Foto', '');
+        });
+        return btn;
+      }
+
+      // quebra as fotos em páginas e agrupa as páginas em spreads
+      var pages = [];
+      for (var i = 0; i < ALBUM.length; i += PER_PAGE) {
+        pages.push(ALBUM.slice(i, i + PER_PAGE));
+      }
+      var spreads = [];
+      for (var j = 0; j < pages.length; j += PAGES_PER_SPREAD) {
+        spreads.push(pages.slice(j, j + PAGES_PER_SPREAD));
+      }
+
+      var pageCounter = 0;
+      var frameSeq = 0;
+      var spreadEls = spreads.map(function (spreadPages) {
+        var spread = document.createElement('div');
+        spread.className = 'album__spread';
+        spreadPages.forEach(function (pagePhotos) {
+          var pattern = patterns[pageCounter % patterns.length];
+          pageCounter++;
+          var page = document.createElement('div');
+          page.className = 'album__page';
+          pagePhotos.forEach(function (name, idx) {
+            page.appendChild(makeFrame(name, pattern[idx % pattern.length], rotations[frameSeq % rotations.length]));
+            frameSeq++;
+          });
+          spread.appendChild(page);
+        });
+        book.appendChild(spread);
+        return spread;
+      });
+
+      spreads.forEach(function () {
+        var dot = document.createElement('span');
+        dot.className = 'album__dot';
+        dotsWrap.appendChild(dot);
+      });
+
+      var current = 0;
+      function update() {
+        spreadEls.forEach(function (el, i) {
+          if (i === current) {
+            el.hidden = false;
+            el.classList.remove('fade');
+            void el.offsetWidth;        // reflow p/ reativar a animação de fade
+            el.classList.add('fade');
+          } else {
+            el.hidden = true;
+          }
+        });
+        Array.prototype.forEach.call(dotsWrap.children, function (d, i) {
+          d.classList.toggle('active', i === current);
+        });
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === spreadEls.length - 1;
+      }
+
+      prevBtn.addEventListener('click', function () {
+        if (current > 0) { current--; update(); }
+      });
+      nextBtn.addEventListener('click', function () {
+        if (current < spreadEls.length - 1) { current++; update(); }
+      });
+
+      update();
+    }
+
+    /* ============================================================
+       CARTA EM ENVELOPE — abre ao clicar no selo (uma única vez)
+       ============================================================ */
+    function initLoveLetter() {
+      var envelope = document.getElementById('envelope');
+      var seal = document.getElementById('envelopeSeal');
+      var stage = document.querySelector('.letter-stage');
+      var letterEl = document.getElementById('envelopeLetter');
+      if (!envelope || !seal) return;
+
+      // cresce o palco para a carta caber inteira acima do envelope ao abrir
+      function growStage() {
+        if (!stage || !letterEl) return;
+        var needed = Math.ceil(envelope.offsetHeight * 0.52 + letterEl.offsetHeight + 24);
+        if (needed > stage.offsetHeight) stage.style.minHeight = needed + 'px';
+      }
+
+      function openEnvelope() {
+        if (envelope.getAttribute('data-state') !== 'closed') return;
+        growStage();
+        envelope.setAttribute('data-state', 'opening');
+        window.setTimeout(function () {
+          envelope.setAttribute('data-state', 'open');
+        }, 600);
+      }
+
+      seal.addEventListener('click', openEnvelope);
+    }
+
+    /* ============================================================
+       INICIALIZAÇÃO
+       ============================================================ */
+    function init() {
+      initAudioPlayer();
+      initScrollButton();
+      var lightbox = createLightbox();
+      renderTimeline(lightbox.open);
+      renderAlbum(lightbox.open);
+      initLoveLetter();
+      initTimelineReveal();
+      initFloatingHearts();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
